@@ -11,7 +11,7 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/DesafioInoa.App/bin/Debug/net5.0/DesafioInoa.App.dll",
-            "args": ["PETR4", "1", "2"],
+            "args": ["PETR4", "28.07", "27.36"],
             "cwd": "${workspaceFolder}/DesafioInoa.App",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",

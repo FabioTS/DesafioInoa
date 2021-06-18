@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,8 +49,12 @@ namespace DesafioInoa.App
                 {
                     try
                     {
-                        var command = new StockAlertCommand(commandLineArgs[1], double.Parse(commandLineArgs[2]), double.Parse(commandLineArgs[3]), _alertEmail);
                         CommandResult commandResult;
+                        var command = new StockAlertCommand(
+                            commandLineArgs[1],
+                            double.Parse(commandLineArgs[2].Replace(',', '.'), CultureInfo.InvariantCulture),
+                            double.Parse(commandLineArgs[3].Replace(',', '.'), CultureInfo.InvariantCulture),
+                            _alertEmail);
 
                         do
                         {

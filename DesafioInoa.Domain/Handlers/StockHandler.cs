@@ -38,10 +38,22 @@ namespace DesafioInoa.Domain.Handlers
 
             var (commandResult, stock) = await _marketDataService.GetStock(command.Symbol);
 
-            if(!commandResult.Success) return commandResult;
+            if (!commandResult.Success) return commandResult;
 
-            // TODO, rule to send mail
-        
+            var subject = "Stock Advisor recomendation!";
+
+            if (stock.Price > command.SellValue)
+            {
+                var body = $"Your Stock advisor is recomending to sell \"{command.Symbol}\".\nCurrent price is {stock.Price} and reference price is {command.SellValue}";
+                await _mailService.SendMail(command.Email, subject, body);
+            }
+
+            if (stock.Price < command.BuyValue)
+            {
+                var body = $"Your Stock advisor is recomending to buy \"{command.Symbol}\".\nCurrent price is {stock.Price} and reference price is {command.BuyValue}";
+                await _mailService.SendMail(command.Email, subject, body);
+            }
+
             return commandResult;
         }
     }

@@ -23,7 +23,7 @@ namespace DesafioInoa.App.Services
             _smtpClient.Host = _settings.GetValue<string>("MailSettings:PrimaryDomain");
             _smtpClient.EnableSsl = _settings.GetValue<bool>("MailSettings:PrimarySsl");
             _smtpClient.Port = _settings.GetValue<int>("MailSettings:PrimaryPort");
-            _smtpClient.Credentials = new NetworkCredential(_settings.GetValue<string>("UsernameEmail"), _settings.GetValue<string>("UsernamePassword"));
+            _smtpClient.Credentials = new NetworkCredential(_settings.GetValue<string>("MailSettings:UsernameEmail"), _settings.GetValue<string>("MailSettings:UsernamePassword"));
         }
 
         public Task<CommandResult> SendMail(string to, string subject, string body)
@@ -32,13 +32,13 @@ namespace DesafioInoa.App.Services
             {
                 MailMessage message = new MailMessage();
                 MailAddress fromAddress, toAddress, ccAddress, bccAddress;
-                var fromEmail = _settings.GetValue<string>("FromEmail");
+                var fromEmail = _settings.GetValue<string>("MailSettings:FromEmail");
                 _logger.LogDebug($"From e-mail: {fromEmail}");
-                var fromDisplayName = _settings.GetValue<string>("FromDisplayName");
+                var fromDisplayName = _settings.GetValue<string>("MailSettings:FromDisplayName");
                 _logger.LogDebug($"From display name: {fromDisplayName}");
-                var ccEmail = _settings.GetValue<string>("CcEmail");
+                var ccEmail = _settings.GetValue<string>("MailSettings:CcEmail");
                 _logger.LogDebug($"From ccEmail : {ccEmail}");
-                var bccEmail = _settings.GetValue<string>("BccEmail");
+                var bccEmail = _settings.GetValue<string>("MailSettings:BccEmail");
                 _logger.LogDebug($"From bccEmail : {bccEmail}");
 
                 fromAddress = !string.IsNullOrWhiteSpace(fromDisplayName) ? new MailAddress(fromEmail, fromDisplayName) : new MailAddress(fromEmail);
@@ -55,9 +55,10 @@ namespace DesafioInoa.App.Services
                 message.Body = body;
                 message.IsBodyHtml = true;
 
-                _logger.LogTrace($"Envio de e-mail: subject {message.Subject} \n Body: {message.Body}" +
-                    $" \n SMTP UsernameEmail: {_settings.GetValue<string>("UsernameEmail")} " +
-                    $" \n SMTP UsernamePassword: { _settings.GetValue<string>("UsernamePassword")} ");
+                _logger.LogInformation($"Sending e-mail: subject {message.Subject}");
+                _logger.LogTrace($"Sending e-mail: subject {message.Subject} \n Body: {message.Body}" +
+                    $" \n SMTP UsernameEmail: {_settings.GetValue<string>("MailSettings:UsernameEmail")} " +
+                    $" \n SMTP UsernamePassword: { _settings.GetValue<string>("MailSettings:UsernamePassword")} ");
 
                 _smtpClient.Send(message);
                 return Task.FromResult(new CommandResult(true, "Success"));
