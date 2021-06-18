@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using DesafioInoa.Domain.Commands;
 using DesafioInoa.Domain.Services;
@@ -13,13 +12,11 @@ namespace DesafioInoa.Domain.Handlers
     {
         private readonly IMarketDataService _marketDataService;
         private readonly IMailService _mailService;
-        private readonly IConfiguration _settings;
 
         public StockHandler(IMarketDataService marketDataService, IMailService mailService, IConfiguration settings)
         {
             _marketDataService = marketDataService ?? throw new ArgumentNullException("IMarketDataService");
             _mailService = mailService ?? throw new ArgumentNullException("IMailService");
-            _settings = settings ?? throw new ArgumentNullException("IConfiguration");
         }
 
         public async Task<CommandResult> Handle(StockGetCommand command)
@@ -39,18 +36,13 @@ namespace DesafioInoa.Domain.Handlers
             if (!command.IsValid())
                 return new CommandResult(false, "Invalid command", command.Notifications);
 
-            var toEmail = _settings["MailSettings:ToEmail"];
-            var monitoringIntervalMs = int.Parse(_settings["StockQuoteMonitoringIntervalMs"]);
+            var (commandResult, stock) = await _marketDataService.GetStock(command.Symbol);
 
-            string key = null;
-            do
-            {
-                var stock = await _marketDataService.GetStock(command.Symbol);
-                Console.WriteLine(stock.Price);
-                Thread.Sleep(monitoringIntervalMs);
-            } while (key == null);
+            if(!commandResult.Success) return commandResult;
 
-            return new CommandResult(true, "Finished Stock monitoring", null);
+            // TODO, rule to send mail
+        
+            return commandResult;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace DesafioInoa.Domain.ValueObjects
         public string Description { get; set; }
 
         [JsonPropertyName("website")]
-        public Uri Website { get; set; }
+        public string Website { get; set; }
 
         [JsonPropertyName("region")]
         public string Region { get; set; }
@@ -42,7 +42,7 @@ namespace DesafioInoa.Domain.ValueObjects
         public double ChangePercent { get; set; }
 
         [JsonPropertyName("updated_at")]
-        public DateTimeOffset UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 
     public partial class MarketTime
@@ -54,6 +54,6 @@ namespace DesafioInoa.Domain.ValueObjects
         public string Close { get; set; }
 
         [JsonPropertyName("timezone")]
-        public long Timezone { get; set; }
+        public int Timezone { get; set; }
     }
 }

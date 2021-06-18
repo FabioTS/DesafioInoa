@@ -6,16 +6,18 @@ namespace DesafioInoa.Domain.Commands
     {
         public StockAlertCommand() { }
 
-        public StockAlertCommand(string symbol, int sellValue, int buyValue)
+        public StockAlertCommand(string symbol, double sellValue, double buyValue, string email)
         {
             Symbol = symbol;
             SellValue = sellValue;
             BuyValue = buyValue;
+            Email = email;
         }
 
         public string Symbol { get; set; }
-        public int SellValue { get; set; }
-        public int BuyValue { get; set; }
+        public double SellValue { get; set; }
+        public double BuyValue { get; set; }
+        public string Email { get; set; }
 
         public override void Validate()
         {
@@ -24,6 +26,7 @@ namespace DesafioInoa.Domain.Commands
                 .IsGreaterThan(SellValue, 0, "SellValue", "SellValue must be greater than 0")
                 .IsGreaterThan(BuyValue, 0, "BuyValue", "BuyValue must be greater than 0")
                 .AreNotEquals(SellValue, BuyValue, "Value", "BuyValue cannot be equal to SellValue")
+                .IsEmail(Email, "Email", "Email is invalid")
             );
         }
     }

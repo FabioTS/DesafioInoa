@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DesafioInoa.Domain.Commands;
 using DesafioInoa.Domain.Handlers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -14,15 +15,20 @@ namespace DesafioInoa.App
         private readonly ILogger _logger;
         private readonly IHostApplicationLifetime _appLifetime;
         private readonly StockHandler _handler;
+        private readonly int _monitoringIntervalMs;
+        private readonly string _alertEmail;
 
         public StockQuoteAlert(
             ILogger<StockQuoteAlert> logger,
             IHostApplicationLifetime appLifetime,
-            StockHandler handler)
+            StockHandler handler,
+            IConfiguration settings)
         {
             _logger = logger ?? throw new ArgumentNullException("ILogger");
             _appLifetime = appLifetime ?? throw new ArgumentNullException("IHostApplicationLifetime");
             _handler = handler ?? throw new ArgumentNullException("StockHandler");
+            _monitoringIntervalMs = int.Parse(settings["StockQuoteMonitoringIntervalMs"] ?? throw new ArgumentNullException("StockQuoteMonitoringIntervalMs"));
+            _alertEmail = settings["MailSettings:ToEmail"] ?? throw new ArgumentNullException("MailSettings:ToEmail");
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -42,9 +48,17 @@ namespace DesafioInoa.App
                 {
                     try
                     {
-                        var command = new StockAlertCommand(commandLineArgs[1], int.Parse(commandLineArgs[2]), int.Parse(commandLineArgs[3]));
-                        var commandResult = await _handler.Handle(command);
-                        _logger.LogInformation(JsonSerializer.Serialize(commandResult, new JsonSerializerOptions() { WriteIndented = true }));
+                        var command = new StockAlertCommand(commandLineArgs[1], double.Parse(commandLineArgs[2]), double.Parse(commandLineArgs[3]), _alertEmail);
+                        CommandResult commandResult;
+
+                        do
+                        {
+                            commandResult = await _handler.Handle(command);
+                            _logger.LogInformation(JsonSerializer.Serialize(commandResult, new JsonSerializerOptions() { WriteIndented = true }));
+                            if (!commandResult.Success) break;
+                            Thread.Sleep(_monitoringIntervalMs);
+
+                        } while (!cancellationToken.IsCancellationRequested);
                     }
                     catch (Exception ex)
                     {
