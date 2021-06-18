@@ -25,3 +25,8 @@ Chave para uso interno / servidor
 Domínio não informado
 
 <https://api.hgbrasil.com/finance/stock_price?key=c3271e75&symbol=PETR4>
+
+## SendGrid
+
+Login: gayoja7350@d4wan.com
+Password: RkMmC2LyTXaP4tqJ

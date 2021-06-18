@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/DesafioInoa.Domain/DesafioInoa.Domain.csproj",
+                "${workspaceFolder}/DesafioInoa.App/DesafioInoa.App.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/DesafioInoa.Domain/DesafioInoa.Domain.csproj",
+                "${workspaceFolder}/DesafioInoa.App/DesafioInoa.App.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -32,7 +32,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/DesafioInoa.Domain/DesafioInoa.Domain.csproj",
+                "${workspaceFolder}/DesafioInoa.App/DesafioInoa.App.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

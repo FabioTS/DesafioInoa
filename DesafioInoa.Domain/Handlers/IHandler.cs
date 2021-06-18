@@ -5,6 +5,6 @@ namespace DesafioInoa.Domain.Handlers
 {
     public interface IHandler<T> where T : ICommand
     {
-        Task<ICommandResult> Handle(T command);
+        Task<CommandResult> Handle(T command);
     }
 }

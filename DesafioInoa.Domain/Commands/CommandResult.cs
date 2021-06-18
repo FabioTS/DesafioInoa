@@ -4,7 +4,7 @@ namespace DesafioInoa.Domain.Commands
     public class CommandResult : ICommandResult
     {
         public CommandResult() { }
-        public CommandResult(bool success, string message, dynamic data)
+        public CommandResult(bool success, string message, dynamic data = null)
         {
             Success = success;
             Message = message;
