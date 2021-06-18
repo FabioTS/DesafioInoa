@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using DesafioInoa.Domain.Commands;
 using DesafioInoa.Domain.Services;
@@ -42,20 +43,27 @@ namespace DesafioInoa.Domain.Handlers
 
             var subject = "Stock Advisor recomendation!";
 
-            if (stock.Price > command.SellValue)
-            {
-                var body = $"Your Stock advisor is recomending to sell \"{command.Symbol}\".\nCurrent price is {stock.Price} and reference price is {command.SellValue}";
-                await _mailService.SendMail(command.Email, subject, body);
-            }
+            var appPath = Directory.GetParent(AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.IndexOf("bin"))).ToString();
+            var htmlTemplate = File.ReadAllText(Path.Combine(appPath.Replace(".App", ".Domain"), "Templates/") + "email.html");
 
-            if (stock.Price < command.BuyValue)
-            {
-                var body = $"Your Stock advisor is recomending to buy \"{command.Symbol}\".\nCurrent price is {stock.Price} and reference price is {command.BuyValue}";
+            string body = null;
+            if (stock.Price > command.SellValue)
+                body = FormatEmail(htmlTemplate, command.Symbol, "Sell", stock.Price.ToString(), command.SellValue.ToString());
+            else if (stock.Price < command.BuyValue)
+                body = FormatEmail(htmlTemplate, command.Symbol, "Buy", stock.Price.ToString(), command.BuyValue.ToString());
+
+            if (body != null)
                 await _mailService.SendMail(command.Email, subject, body);
-            }
 
             return commandResult;
         }
+
+        private string FormatEmail(string template, string symbol, string type, string stockPrice, string stockValue) => template
+            .Replace("{{Symbol}}", symbol)
+            .Replace("{{Buy_or_Sell}}", type)
+            .Replace("{{StockPrice}}", stockPrice)
+            .Replace("{{StockValue}}", stockValue)
+            ;
     }
 }
 
