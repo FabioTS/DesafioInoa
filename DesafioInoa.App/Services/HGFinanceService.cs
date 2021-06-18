@@ -40,7 +40,7 @@ namespace DesafioInoa.App.Services
                 return (new CommandResult(false, "An error ocurred while trying to fetch Stock"), default);
             }
 
-            var jSymbol = jsonResponse.GetProperty("results").GetProperty(symbol);
+            var jSymbol = jsonResponse.GetProperty("results").GetProperty(symbol.ToUpperInvariant());
             if (jSymbol.TryGetProperty("error", out var jError))
             {
                 var msg = jSymbol.GetProperty("message").GetString();
