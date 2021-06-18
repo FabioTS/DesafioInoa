@@ -13,54 +13,66 @@ namespace DesafioInoa.App.Services
     {
         private readonly ILogger _logger;
         private readonly IConfiguration _settings;
-        private readonly SmtpClient _smtpClient;
+        private readonly int _emailIntervalMinutes;
+        private DateTime LastEmailSent;
         public MailSmtpService(ILogger<MailSmtpService> logger, IConfiguration settings)
         {
             _logger = logger ?? throw new ArgumentNullException("ILogger");
             _settings = settings ?? throw new ArgumentNullException("IConfiguration");
-
-            _smtpClient = new SmtpClient();
-            _smtpClient.Host = _settings.GetValue<string>("MailSettings:PrimaryDomain");
-            _smtpClient.EnableSsl = _settings.GetValue<bool>("MailSettings:PrimarySsl");
-            _smtpClient.Port = _settings.GetValue<int>("MailSettings:PrimaryPort");
-            _smtpClient.Credentials = new NetworkCredential(_settings.GetValue<string>("MailSettings:UsernameEmail"), _settings.GetValue<string>("MailSettings:UsernamePassword"));
+            _emailIntervalMinutes = _settings.GetValue<int>("EmailIntervalMinutes", 10);
         }
 
         public Task<CommandResult> SendMail(string to, string subject, string body)
         {
             try
             {
-                MailMessage message = new MailMessage();
-                MailAddress fromAddress, toAddress, ccAddress, bccAddress;
-                var fromEmail = _settings.GetValue<string>("MailSettings:FromEmail");
-                _logger.LogDebug($"From e-mail: {fromEmail}");
-                var fromDisplayName = _settings.GetValue<string>("MailSettings:FromDisplayName");
-                _logger.LogDebug($"From display name: {fromDisplayName}");
-                var ccEmail = _settings.GetValue<string>("MailSettings:CcEmail");
-                _logger.LogDebug($"From ccEmail : {ccEmail}");
-                var bccEmail = _settings.GetValue<string>("MailSettings:BccEmail");
-                _logger.LogDebug($"From bccEmail : {bccEmail}");
+                if (LastEmailSent != default
+                    && DateTime.UtcNow < LastEmailSent + TimeSpan.FromMinutes(_emailIntervalMinutes))
+                {
+                    _logger.LogInformation("Email interval minutes reached, waiting...");
+                    return Task.FromResult(new CommandResult(true, "Email interval minutes reached"));
+                }
 
-                fromAddress = !string.IsNullOrWhiteSpace(fromDisplayName) ? new MailAddress(fromEmail, fromDisplayName) : new MailAddress(fromEmail);
-                toAddress = !string.IsNullOrWhiteSpace(to) ? new MailAddress(to) : null;
-                ccAddress = !string.IsNullOrWhiteSpace(ccEmail) ? new MailAddress(ccEmail) : null;
-                bccAddress = !string.IsNullOrWhiteSpace(bccEmail) ? new MailAddress(bccEmail) : null;
+                using (SmtpClient smtpClient = new SmtpClient())
+                {
+                    smtpClient.Host = _settings.GetValue<string>("MailSettings:PrimaryDomain");
+                    smtpClient.EnableSsl = _settings.GetValue<bool>("MailSettings:PrimarySsl");
+                    smtpClient.Port = _settings.GetValue<int>("MailSettings:PrimaryPort");
+                    smtpClient.Credentials = new NetworkCredential(_settings.GetValue<string>("MailSettings:UsernameEmail"), _settings.GetValue<string>("MailSettings:UsernamePassword"));
 
-                if (fromAddress != null) message.From = fromAddress;
-                if (toAddress != null) message.To.Add(toAddress);
-                if (ccAddress != null) message.CC.Add(ccAddress);
-                if (bccAddress != null) message.Bcc.Add(bccAddress);
+                    MailMessage message = new MailMessage();
+                    MailAddress fromAddress, toAddress, ccAddress, bccAddress;
+                    var fromEmail = _settings.GetValue<string>("MailSettings:FromEmail");
+                    _logger.LogDebug($"From e-mail: {fromEmail}");
+                    var fromDisplayName = _settings.GetValue<string>("MailSettings:FromDisplayName");
+                    _logger.LogDebug($"From display name: {fromDisplayName}");
+                    var ccEmail = _settings.GetValue<string>("MailSettings:CcEmail");
+                    _logger.LogDebug($"From ccEmail : {ccEmail}");
+                    var bccEmail = _settings.GetValue<string>("MailSettings:BccEmail");
+                    _logger.LogDebug($"From bccEmail : {bccEmail}");
 
-                message.Subject = subject;
-                message.Body = body;
-                message.IsBodyHtml = true;
+                    fromAddress = !string.IsNullOrWhiteSpace(fromDisplayName) ? new MailAddress(fromEmail, fromDisplayName) : new MailAddress(fromEmail);
+                    toAddress = !string.IsNullOrWhiteSpace(to) ? new MailAddress(to) : null;
+                    ccAddress = !string.IsNullOrWhiteSpace(ccEmail) ? new MailAddress(ccEmail) : null;
+                    bccAddress = !string.IsNullOrWhiteSpace(bccEmail) ? new MailAddress(bccEmail) : null;
 
-                _logger.LogInformation($"Sending e-mail: subject {message.Subject}");
-                _logger.LogTrace($"Sending e-mail: subject {message.Subject} \n Body: {message.Body}" +
-                    $" \n SMTP UsernameEmail: {_settings.GetValue<string>("MailSettings:UsernameEmail")} " +
-                    $" \n SMTP UsernamePassword: { _settings.GetValue<string>("MailSettings:UsernamePassword")} ");
+                    if (fromAddress != null) message.From = fromAddress;
+                    if (toAddress != null) message.To.Add(toAddress);
+                    if (ccAddress != null) message.CC.Add(ccAddress);
+                    if (bccAddress != null) message.Bcc.Add(bccAddress);
 
-                _smtpClient.Send(message);
+                    message.Subject = subject;
+                    message.Body = body;
+                    message.IsBodyHtml = true;
+
+                    _logger.LogInformation($"Sending e-mail: subject {message.Subject}");
+                    _logger.LogTrace($"Sending e-mail: subject {message.Subject} \n Body: {message.Body}" +
+                        $" \n SMTP UsernameEmail: {_settings.GetValue<string>("MailSettings:UsernameEmail")} " +
+                        $" \n SMTP UsernamePassword: { _settings.GetValue<string>("MailSettings:UsernamePassword")} ");
+
+                    smtpClient.Send(message);
+                }
+                LastEmailSent = DateTime.UtcNow;
                 return Task.FromResult(new CommandResult(true, "Success"));
             }
             catch (System.Exception ex)

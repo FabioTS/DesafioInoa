@@ -48,8 +48,6 @@ namespace DesafioInoa.App.Services
                 return (new CommandResult(false, msg), default);
             }
 
-            // _logger.LogInformation(jsonResponse.ToString());
-
             var stock = JsonSerializer.Deserialize<Stock>(jSymbol.GetRawText(), new JsonSerializerOptions() { Converters = { new DateTimeConverterUsingDateTimeParse() } });
 
             return (new CommandResult(true, "Success", stock), stock);
