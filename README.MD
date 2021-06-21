@@ -59,6 +59,17 @@ ou,
     > cd .\app\
     > .\DesafioInoa.App.exe PETR4 22.67 22.59
 
+## API
+
+Foi desenvolvida uma API simples que pode ser executada da seguinte forma:
+
+    > cd DesafioInoa.Api
+    > dotnet run
+
+Enquanto a API estiver em execução, é possível acessar sua documentação pelo Swagger.
+
+> <http://localhost:5000/swagger>
+
 ## Autores
 
 * **Fábio Trevizolo** - *Desenvolvedor* - [FabioTS](https://github.com/FabioTS)
