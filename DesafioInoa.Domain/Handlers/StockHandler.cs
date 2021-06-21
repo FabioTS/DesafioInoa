@@ -41,19 +41,14 @@ namespace DesafioInoa.Domain.Handlers
 
             if (!commandResult.Success) return commandResult;
 
-            var subject = "Stock Advisor recomendation!";
-
-            var appPath = Directory.GetParent(AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.IndexOf("bin"))).ToString();
-            var htmlTemplate = File.ReadAllText(Path.Combine(appPath.Replace(".App", ".Domain"), "Templates/") + "email.html");
-
             string body = null;
             if (stock.Price > command.SellValue)
-                body = FormatEmail(htmlTemplate, command.Symbol, "Sell", stock.Price.ToString(), command.SellValue.ToString());
+                body = FormatEmail(LoadEmailTemplate(), command.Symbol, "Sell", stock.Price.ToString(), command.SellValue.ToString());
             else if (stock.Price < command.BuyValue)
-                body = FormatEmail(htmlTemplate, command.Symbol, "Buy", stock.Price.ToString(), command.BuyValue.ToString());
+                body = FormatEmail(LoadEmailTemplate(), command.Symbol, "Buy", stock.Price.ToString(), command.BuyValue.ToString());
 
             if (body != null)
-                await _mailService.SendMail(command.Email, subject, body);
+                await _mailService.SendMail(command.Email, "Stock Advisor recomendation!", body);
 
             return commandResult;
         }
@@ -64,6 +59,27 @@ namespace DesafioInoa.Domain.Handlers
             .Replace("{{StockPrice}}", stockPrice)
             .Replace("{{StockValue}}", stockValue)
             ;
+
+        private string LoadEmailTemplate()
+        {
+            try
+            {
+                string appPath;
+
+                try // Path using dotnet run (dll)
+                {
+                    appPath = Directory.GetParent(AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.IndexOf("bin"))).ToString();
+                    return File.ReadAllText(Path.Combine(appPath.Replace(".App", ".Domain"), "Templates/") + "email.html");
+                }
+                catch // Path using self contained app (exe)
+                {
+                    return File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Templates/") + "email.html");
+                }
+            }
+            catch // Fallback text
+            {
+                return "Your Stock advisor is recomending to {{Buy_or_Sell}} \"{{Symbol}}\". \n\rCurrent price is {{StockPrice}} and reference price is {{StockValue}}";
+            }
+        }
     }
 }
-

@@ -21,7 +21,13 @@
                 "publish",
                 "${workspaceFolder}/DesafioInoa.App/DesafioInoa.App.csproj",
                 "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "/consoleloggerparameters:NoSummary",
+                "-p:PublishSingleFile=true",
+                "-p:PublishTrimmed=true",
+                "--output", "${workspaceFolder}/app/",
+                "--runtime", "win-x64",
+                "--configuration", "Release",
+                "--self-contained", "true"
             ],
             "problemMatcher": "$msCompile"
         },

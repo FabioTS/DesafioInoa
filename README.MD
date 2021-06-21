@@ -14,7 +14,7 @@ Ele deve ser chamado via linha de comando com 3 parâmetros.
 
 Ex:
 
-> stock-quote-alert.exe PETR4 22.67 22.59
+    > stock-quote-alert.exe PETR4 22.67 22.59
 
 Ele deve ler de um arquivo de configuração com:
 
@@ -35,20 +35,29 @@ Toda vez que o preço for menor que linha-vermelha, um e-mail deve ser disparado
 
 Features extras são bem vindas, boas práticas e patterns também ;)
 
-## Primeiros Passos
+## Pré requisitos
 
-Para facilitar o uso da API, é possível no momento acessar a **[Documentação](swagger)** que contém todos os seus *endpoints*.
+Faça o download da última versão .NET [.NET 5.0 SDK](https://dotnet.microsoft.com/download)
 
-### Pré requisitos
+[Saiba mais sobre .NET](https://docs.microsoft.com/dotnet/fundamentals/)
 
-* Faça o download da última versão .NET [.NET 5.0 SDK](https://dotnet.microsoft.com/download)
-* [Saiba mais sobre .NET](https://docs.microsoft.com/dotnet/fundamentals/)
+Verifique a versão do .NET executando:
 
-> dotnet --version
+    > dotnet --version
+## Instalando e usando
 
-### Instalando
+Para fazer uso correto da aplicação, é possível executar principalmente de duas formas:
 
-> dotnet restore
+Na pasta raiz, execute:
+
+    > cd DesafioInoa.App
+    > dotnet run PETR4 22.67 22.59
+
+ou,
+
+    > dotnet publish DesafioInoa.App\ --output .\app\ --runtime win-x64 --configuration Release -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
+    > cd .\app\
+    > .\DesafioInoa.App.exe PETR4 22.67 22.59
 
 ## Autores
 

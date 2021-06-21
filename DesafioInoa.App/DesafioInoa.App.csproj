@@ -13,4 +13,9 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Include="appsettings.json" CopyToPublishDirectory="PreserveNewest"/>
+    <Content Include="..\DesafioInoa.Domain\Templates\**" CopyToPublishDirectory="PreserveNewest" Link="Templates\%(RecursiveDir)\%(Filename)%(Extension)"/>
+  </ItemGroup>
+
 </Project>
