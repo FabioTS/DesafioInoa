@@ -78,7 +78,7 @@ namespace DesafioInoa.App.Services
             catch (System.Exception ex)
             {
                 _logger.LogError(ex, "An exception ocurred while trying to send mail");
-                return Task.FromResult(new CommandResult(false, "Exception"));
+                return Task.FromResult(new CommandResult(false, "Exception", null, HttpStatusCode.InternalServerError));
             }
         }
     }

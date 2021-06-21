@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using DesafioInoa.Domain.Commands;
 using DesafioInoa.Domain.Services;
@@ -24,18 +25,18 @@ namespace DesafioInoa.Domain.Handlers
         {
             // Fail fast validation
             if (!command.IsValid())
-                return new CommandResult(false, "Invalid command", command.Notifications);
+                return new CommandResult(false, "Invalid command", command.Notifications, HttpStatusCode.BadRequest);
 
-            var stock = await _marketDataService.GetStock(command.Symbol);
+            var (commandResult, _) = await _marketDataService.GetStock(command.Symbol);
 
-            return new CommandResult(true, "Stock retrieved!", stock);
+            return commandResult;
         }
 
         public async Task<CommandResult> Handle(StockAlertCommand command)
         {
             // Fail fast validation
             if (!command.IsValid())
-                return new CommandResult(false, "Invalid command", command.Notifications);
+                return new CommandResult(false, "Invalid command", command.Notifications, HttpStatusCode.BadRequest);
 
             var (commandResult, stock) = await _marketDataService.GetStock(command.Symbol);
 

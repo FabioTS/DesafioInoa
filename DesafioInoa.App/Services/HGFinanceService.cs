@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -37,15 +38,22 @@ namespace DesafioInoa.App.Services
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("An error ocurred while trying to fetch Stock");
-                return (new CommandResult(false, "An error ocurred while trying to fetch Stock"), default);
+                return (new CommandResult(false, "An error ocurred while trying to fetch Stock", null, HttpStatusCode.BadGateway), default);
             }
 
-            var jSymbol = jsonResponse.GetProperty("results").GetProperty(symbol.ToUpperInvariant());
+            var jResults = jsonResponse.GetProperty("results");
+            if (!jResults.TryGetProperty(symbol.ToUpperInvariant(), out var jSymbol))
+            {
+                var msg = $"Error to get Stock for #{symbol}: Símbolo não disponível";
+                _logger.LogError(msg);
+                return (new CommandResult(false, msg, null, HttpStatusCode.BadRequest), default);
+            }
+
             if (jSymbol.TryGetProperty("error", out var jError))
             {
                 var msg = jSymbol.GetProperty("message").GetString();
                 _logger.LogError(msg);
-                return (new CommandResult(false, msg), default);
+                return (new CommandResult(false, msg, null, HttpStatusCode.BadRequest), default);
             }
 
             var stock = JsonSerializer.Deserialize<Stock>(jSymbol.GetRawText(), new JsonSerializerOptions() { Converters = { new DateTimeConverterUsingDateTimeParse() } });

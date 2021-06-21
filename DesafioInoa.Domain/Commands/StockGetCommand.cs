@@ -5,6 +5,10 @@ namespace DesafioInoa.Domain.Commands
     public class StockGetCommand : BaseCommand
     {
         public StockGetCommand() { }
+        public StockGetCommand(string symbol)
+        {
+            Symbol = symbol;
+        }
 
         public string Symbol { get; set; }
 
