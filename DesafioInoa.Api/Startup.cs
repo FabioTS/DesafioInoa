@@ -1,6 +1,8 @@
 using System;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using DesafioInoa.Api.Services;
+using DesafioInoa.App;
 using DesafioInoa.App.Services;
 using DesafioInoa.Domain.Handlers;
 using DesafioInoa.Domain.Services;
@@ -26,15 +28,19 @@ namespace DesafioInoa.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddRouting(options => options.LowercaseUrls = true);
+
             services.AddControllers()
                 .AddJsonOptions(opts =>
                 {
                     opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
 
+            services.AddSingleton<TokenStorageService, TokenStorageService>();
             services.AddScoped<IMarketDataService, HGFinanceService>();
             services.AddScoped<IMailService, MailSmtpService>();
             services.AddTransient<StockHandler, StockHandler>();
+            services.AddTransient<StockQuoteAlert, StockQuoteAlert>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

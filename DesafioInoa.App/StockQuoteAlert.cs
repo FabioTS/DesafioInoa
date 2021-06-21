@@ -11,13 +11,14 @@ using Microsoft.Extensions.Logging;
 
 namespace DesafioInoa.App
 {
-    class StockQuoteAlert : IHostedService
+    public class StockQuoteAlert : IHostedService
     {
         private readonly ILogger _logger;
         private readonly IHostApplicationLifetime _appLifetime;
         private readonly StockHandler _handler;
         private readonly int _monitoringIntervalMs;
         private readonly string _alertEmail;
+        public const string ARGS_ENV_VAR = "STOCK_MONITOR_ARGS";
 
         public StockQuoteAlert(
             ILogger<StockQuoteAlert> logger,
@@ -34,21 +35,28 @@ namespace DesafioInoa.App
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            var commandLineArgs = Environment.GetCommandLineArgs();
-            _logger.LogDebug($"Starting with arguments: {string.Join(" ", commandLineArgs)}");
-
-            if (commandLineArgs.Length != 4)
-            {
-                _logger.LogError("Invalid number of arguments, must have 3: [stock symbol, sell value, buy value]");
-                return Task.CompletedTask;
-            }
-
             _appLifetime.ApplicationStarted.Register(() =>
             {
                 Task.Run(async () =>
                 {
                     try
                     {
+                        var commandLineArgs = Environment.GetCommandLineArgs();
+                        var envArgs = Environment.GetEnvironmentVariable(ARGS_ENV_VAR);
+
+                        // Try to get from environment variable
+                        if (commandLineArgs.Length == 1 && envArgs != default)
+                            commandLineArgs = envArgs.Split();
+
+                        _logger.LogDebug($"Starting with arguments: {string.Join(" ", commandLineArgs)}");
+
+                        if (commandLineArgs.Length != 4)
+                        {
+                            _logger.LogError("Invalid number of arguments, must have 3: [stock symbol, sell value, buy value]");
+                            _appLifetime.StopApplication();
+                            return;
+                        }
+
                         CommandResult commandResult;
                         var command = new StockAlertCommand(
                             commandLineArgs[1],
@@ -71,8 +79,7 @@ namespace DesafioInoa.App
                     }
                     finally
                     {
-                        // Stop the application once the work is done
-                        _appLifetime.StopApplication();
+                        _logger.LogDebug($"StockQuoteAlert Task {Task.CurrentId} finished.");
                     }
                 });
             });
